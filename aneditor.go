@@ -14,7 +14,5 @@ func main() {
 	} else {
 		message := make(chan string)
 		go ConnectTo(message, "/tmp/aneditor.sock")
-
-		// RunUI(message)
 	}
 }
