@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 // ConnectTo connects to the socket /tmp/aneditor.sock
@@ -25,11 +26,19 @@ func ConnectTo(message chan string, socketPath string) {
 	}
 
 	bufconn := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	bufconn.WriteString("ping\n")
-	bufconn.Flush()
-	line, err := bufconn.ReadString('\n')
-	if err != nil {
-		log.Fatal("Error reading line from socket: " + err.Error())
+
+	for msg := range message {
+		bufconn.WriteString(msg + "\n")
+		bufconn.Flush()
+
+		line, err := bufconn.ReadString('\n')
+		if err != nil {
+			if err.Error() == "EOF" {
+				close(message)
+				return
+			}
+			log.Fatal("Error reading line from socket: " + err.Error())
+		}
+		message <- strings.TrimSpace(line)
 	}
-	message <- "alert " + line
 }
