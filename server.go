@@ -9,10 +9,10 @@ import (
 	"strings"
 )
 
-// NewServer creates a new server listening at socketPath
-func NewServer(socketPath string) {
+// NewServer creates a new server listening on port
+func NewServer(port string) {
 	log.Print("Making a new server")
-	sock, err := net.Listen("unix", socketPath)
+	sock, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatal("Error creating socket:", err)
 	}
