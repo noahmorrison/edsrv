@@ -28,21 +28,15 @@ type connMsg struct {
 	conn    net.Conn
 	id      string
 	command string
-	args    []string
 }
 
 func handleMessages(message chan connMsg) {
 	for msg := range message {
-		switch msg.command {
-		// Leave the function, thus quiting the server
-		case "quit":
+		if msg.command == "q" {
 			return
-
-		// Simple ping/pong command
-		case "ping":
-			msg.conn.Write([]byte("pong\n"))
-
-		default:
+		} else if msg.command == "Q" {
+			return
+		} else {
 			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.command)
 		}
 	}
@@ -77,11 +71,8 @@ func handleConnection(message chan connMsg, conn net.Conn) {
 			return
 		}
 
-		line = strings.TrimSpace(line)
-		cmd := strings.Split(line, " ")
-		args := cmd[1:]
-
-		message <- connMsg{conn, id, cmd[0], args}
+		cmd := strings.TrimSpace(line)
+		message <- connMsg{conn, id, cmd}
 	}
 }
 
