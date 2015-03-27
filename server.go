@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -32,7 +33,14 @@ type connMsg struct {
 
 func handleMessages(message chan connMsg) {
 	for msg := range message {
-		cmd := msg.command
+		line := msg.command
+		a1, line := getAddress(line)
+		line = strings.TrimPrefix(line, ",")
+		a2, cmd := getAddress(line)
+		log.Printf("a1: %d", a1)
+		log.Printf("a2: %d", a2)
+		log.Printf("cmd: %s", cmd)
+
 		if cmd == "q" {
 			return
 		} else if cmd == "Q" {
@@ -42,6 +50,23 @@ func handleMessages(message chan connMsg) {
 			log.Printf("Editing file: " + filename)
 		} else {
 			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.command)
+		}
+	}
+}
+
+// getAddress parses a digit from the from of a line.
+// It returns the digit, and the rest of the line.
+// It returns -1 if no digit was found.
+func getAddress(line string) (int, string) {
+	offset := len(line)
+	for {
+		digit, err := strconv.Atoi(line[0:offset])
+		if err == nil {
+			return digit, line[offset:]
+		}
+		offset--
+		if offset == 0 {
+			return -1, line
 		}
 	}
 }
