@@ -32,10 +32,14 @@ type connMsg struct {
 
 func handleMessages(message chan connMsg) {
 	for msg := range message {
-		if msg.command == "q" {
+		cmd := msg.command
+		if cmd == "q" {
 			return
-		} else if msg.command == "Q" {
+		} else if cmd == "Q" {
 			return
+		} else if strings.HasPrefix(cmd, "e") {
+			filename := strings.TrimPrefix(cmd, "e ")
+			log.Printf("Editing file: " + filename)
 		} else {
 			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.command)
 		}
