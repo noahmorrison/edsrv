@@ -1,10 +1,18 @@
 package main
 
+import (
+	"bufio"
+	"log"
+	"os"
+)
+
 // A Buffer is a view into a file on the servers computer
 type Buffer struct {
 	prev *Stack
 	curr *string
 	next *Stack
+
+	file *string
 }
 
 // EmptyBuffer returns a new, empty, buffer
@@ -14,6 +22,29 @@ func EmptyBuffer() *Buffer {
 		curr: nil,
 		next: new(Stack),
 	}
+}
+
+// BufferFromFile returns a new buffer of the given filepath
+func BufferFromFile(filepath string) *Buffer {
+	buff := EmptyBuffer()
+	buff.file = &filepath
+
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Printf("Opening a new file [%s]", filepath)
+		return buff
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+
+	for scanner.Scan() {
+		buff.Append(scanner.Text())
+	}
+
+	buff.Goto(1)
+	return buff
 }
 
 // GetLine returns the current line from the buffer

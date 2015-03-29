@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+)
 
 func TestInsert(t *testing.T) {
 	buff := EmptyBuffer()
@@ -98,6 +102,29 @@ func TestTotalLines(t *testing.T) {
 	assert(t, buff.GetTotalLines(), 2)
 	buff.Insert("line 2")
 	assert(t, buff.GetTotalLines(), 3)
+}
+
+func TestFromFile(t *testing.T) {
+	file, _ := ioutil.TempFile(os.TempDir(), "edsrv-test")
+	defer os.Remove(file.Name())
+
+	file.WriteString("line 1\nline 2\n")
+
+	buff := BufferFromFile(file.Name())
+	assert(t, buff.GetLine(), "line 1")
+	buff.NextLine()
+	assert(t, buff.GetLine(), "line 2")
+	buff.NextLine()
+	assert(t, buff.GetLine(), "line 2")
+}
+
+func TestFromNewFile(t *testing.T) {
+	file, _ := ioutil.TempFile(os.TempDir(), "edsrv-test")
+	name := file.Name()
+	os.Remove(file.Name())
+
+	buff := BufferFromFile(name)
+	assert(t, buff.GetLine(), "")
 }
 
 func assert(t *testing.T, a, b interface{}) {
