@@ -85,10 +85,10 @@ func handleSocket(inChan chan connMsg, sock net.Listener) {
 
 func handleConnection(inChan chan connMsg, conn net.Conn) {
 	id := newID()
+	rd := bufio.NewReader(conn)
 
 	log.Print("New connection, id: " + id)
 	for {
-		rd := bufio.NewReader(conn)
 		line, err := rd.ReadString('\n')
 		if err != nil {
 			if err.Error() == "EOF" {
@@ -101,7 +101,9 @@ func handleConnection(inChan chan connMsg, conn net.Conn) {
 		}
 
 		cmd := strings.TrimSpace(line)
-		message <- connMsg{conn, id, cmd}
+		if cmd != "" {
+			inChan <- connMsg{conn, id, cmd}
+		}
 	}
 }
 
