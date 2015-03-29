@@ -19,21 +19,21 @@ func NewServer(port string) {
 	}
 	defer sock.Close()
 
-	message := make(chan connMsg)
+	inChan := make(chan connMsg)
 
-	go handleSocket(message, sock)
-	handleMessages(message)
+	go handleSocket(inChan, sock)
+	handleMessages(inChan)
 }
 
 type connMsg struct {
-	conn    net.Conn
-	id      string
-	command string
+	conn net.Conn
+	id   string
+	text string
 }
 
 func handleMessages(message chan connMsg) {
 	for msg := range message {
-		line := msg.command
+		line := msg.text
 		a1, line := getAddress(line)
 		line = strings.TrimPrefix(line, ",")
 		a2, cmd := getAddress(line)
@@ -49,7 +49,7 @@ func handleMessages(message chan connMsg) {
 			filename := strings.TrimPrefix(cmd, "e ")
 			log.Printf("Editing file: " + filename)
 		} else {
-			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.command)
+			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.text)
 		}
 	}
 }
@@ -71,7 +71,7 @@ func getAddress(line string) (int, string) {
 	}
 }
 
-func handleSocket(message chan connMsg, sock net.Listener) {
+func handleSocket(inChan chan connMsg, sock net.Listener) {
 	for {
 		conn, err := sock.Accept()
 		if err != nil {
@@ -79,11 +79,11 @@ func handleSocket(message chan connMsg, sock net.Listener) {
 		}
 		defer conn.Close()
 
-		go handleConnection(message, conn)
+		go handleConnection(inChan, conn)
 	}
 }
 
-func handleConnection(message chan connMsg, conn net.Conn) {
+func handleConnection(inChan chan connMsg, conn net.Conn) {
 	id := newID()
 
 	log.Print("New connection, id: " + id)
