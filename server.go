@@ -32,6 +32,8 @@ type connMsg struct {
 }
 
 func handleMessages(message chan connMsg) {
+	buffer := EmptyBuffer()
+
 	for msg := range message {
 		line := msg.text
 		a1, line := getAddress(line)
@@ -47,7 +49,9 @@ func handleMessages(message chan connMsg) {
 			return
 		} else if strings.HasPrefix(cmd, "e") {
 			filename := strings.TrimPrefix(cmd, "e ")
-			log.Printf("Editing file: " + filename)
+			buffer = BufferFromFile(filename)
+		} else if cmd == "p" {
+			say(msg.conn, buffer.GetLine())
 		} else {
 			log.Printf("Unknown command from conn(%s): %s", msg.id, msg.text)
 		}
@@ -115,4 +119,9 @@ func newID() string {
 	}
 
 	return hex.EncodeToString(rb)
+}
+
+func say(conn net.Conn, line string) {
+	conn.Write([]byte(line + "\n"))
+	log.Printf("Printing line [%s]", line)
 }
