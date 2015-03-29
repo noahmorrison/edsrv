@@ -18,7 +18,11 @@ func EmptyBuffer() *Buffer {
 
 // GetLine returns the current line from the buffer
 func (buff *Buffer) GetLine() string {
-	return *buff.curr
+	if buff.curr != nil {
+		return *buff.curr
+	}
+
+	return ""
 }
 
 // GetLineNum returns the current line number

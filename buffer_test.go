@@ -72,6 +72,11 @@ func TestGoto(t *testing.T) {
 	assert(t, buff.GetLine(), "line 1")
 }
 
+func TestGetLine(t *testing.T) {
+	buff := EmptyBuffer()
+	assert(t, buff.GetLine(), "")
+}
+
 func TestLineNumber(t *testing.T) {
 	buff := EmptyBuffer()
 
