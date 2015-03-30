@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"log"
 	"os"
 )
@@ -45,6 +46,33 @@ func BufferFromFile(filepath string) *Buffer {
 
 	buff.Goto(1)
 	return buff
+}
+
+// Write writes the buffer to the file associated with it
+func (buff *Buffer) Write() error {
+	if buff.file == nil {
+		return errors.New("Buffer has no file associated with it")
+	}
+
+	file, err := os.Create(*buff.file)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	orgLine := buff.GetLineNum()
+
+	lastLine := 0
+	buff.Goto(1)
+	for buff.GetLineNum() != lastLine {
+		file.WriteString(buff.GetLine() + "\n")
+
+		lastLine = buff.GetLineNum()
+		buff.NextLine()
+	}
+
+	buff.Goto(orgLine)
+	return nil
 }
 
 // GetLine returns the current line from the buffer

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -133,6 +134,33 @@ func TestFromEmptyFile(t *testing.T) {
 
 	buff := BufferFromFile(file.Name())
 	assert(t, *buff.file, file.Name())
+}
+
+func TestWriteToFile(t *testing.T) {
+	buff := BufferFromFile("/tmp/edsrv-test")
+	assert(t, *buff.file, "/tmp/edsrv-test")
+	buff.Append("line 1")
+	buff.Append("line 2")
+
+	buff.Write()
+
+	file, _ := os.Open("/tmp/edsrv-test")
+	defer os.Remove(file.Name())
+	defer file.Close()
+
+	rd := bufio.NewReader(file)
+
+	line, _ := rd.ReadString('\n')
+	assert(t, line, "line 1\n")
+	line, _ = rd.ReadString('\n')
+	assert(t, line, "line 2\n")
+}
+
+func TestWriteErrors(t *testing.T) {
+	buff := EmptyBuffer()
+	buff.Insert("line 1")
+	err := buff.Write()
+	assert(t, err.Error(), "Buffer has no file associated with it")
 }
 
 func assert(t *testing.T, a, b interface{}) {
