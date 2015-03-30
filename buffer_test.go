@@ -127,6 +127,14 @@ func TestFromNewFile(t *testing.T) {
 	assert(t, buff.GetLine(), "")
 }
 
+func TestFromEmptyFile(t *testing.T) {
+	file, _ := ioutil.TempFile(os.TempDir(), "edsrv-test")
+	defer os.Remove(file.Name())
+
+	buff := BufferFromFile(file.Name())
+	assert(t, *buff.file, file.Name())
+}
+
 func assert(t *testing.T, a, b interface{}) {
 	if a != b {
 		t.Errorf("Assertion failed: '%v' != '%v'", a, b)

@@ -93,6 +93,10 @@ func (buff *Buffer) PrevLine() {
 
 // Goto shifts the lines to the specified line
 func (buff *Buffer) Goto(num int) {
+	if buff.GetTotalLines() == 0 {
+		return
+	}
+
 	if num < 1 {
 		num = 1
 	} else if num > buff.GetTotalLines() {
